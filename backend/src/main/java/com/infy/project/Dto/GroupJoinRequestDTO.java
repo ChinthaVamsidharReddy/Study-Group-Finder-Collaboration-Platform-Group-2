@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
+//@AllArgsConstructor
 public class GroupJoinRequestDTO {
     private Long memberId;      // ID from group_members table
     private Long userId;        // ID from users table

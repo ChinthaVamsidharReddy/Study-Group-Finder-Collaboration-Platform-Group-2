@@ -77,7 +77,7 @@ const PeerSuggestions = () => {
   ).values()];
 
   const PeerCard = ({ peer }) => (
-    <div className="border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-lg transition-all bg-white flex flex-col">
+    <div className="border border-gray-200 dark:border-dark-border rounded-xl p-5 shadow-sm hover:shadow-lg transition-all bg-white dark:bg-dark-card flex flex-col">
       {/* Avatar + Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
@@ -89,8 +89,8 @@ const PeerSuggestions = () => {
             )}
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">{peer.name}</h3>
-            {peer.major && <p className="text-sm text-gray-500">{peer.major}</p>}
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{peer.name}</h3>
+            {peer.major && <p className="text-sm text-gray-500 dark:text-dark-textSecondary">{peer.major}</p>}
           </div>
         </div>
         {/* <span className="text-sm font-medium text-primary-600">{peer.matchScore}% match</span> */}
@@ -139,8 +139,8 @@ const PeerSuggestions = () => {
       <div className="card p-5">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h3 className="text-xl font-bold text-gray-900">Find Study Partners</h3>
-            <p className="text-sm text-gray-500">Connect with classmates who share your courses</p>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Find Study Partners</h3>
+            <p className="text-sm text-gray-500 dark:text-dark-textSecondary">Connect with classmates who share your courses</p>
           </div>
 
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto">
@@ -171,7 +171,7 @@ const PeerSuggestions = () => {
 
       {/* Suggested Peers */}
       <div className="card p-5">
-        <h4 className="text-lg font-semibold text-gray-900 mb-4">Suggested Peers ({filteredPeers.length})</h4>
+        <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Suggested Peers ({filteredPeers.length})</h4>
         {filteredPeers.length === 0 ? (
           <div className="text-center py-8">
             <UserIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />

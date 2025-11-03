@@ -14,9 +14,13 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const API_BASE_URL = 'http://localhost:8080'; // Spring Boot backend
+  // TODO: Backend Integration - API Configuration
+  // Spring Boot backend URL - move to environment variables
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
-  // Logout user
+  // TODO: Backend Integration - Logout
+  // API Endpoint: POST /api/auth/logout
+  // Headers: Authorization: Bearer {token}
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('name');
@@ -27,7 +31,9 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  // Setup user from stored token
+  // TODO: Backend Integration - Token Validation
+  // Validates JWT token and sets up user session
+  // Backend should provide JWT with user info in payload
   const setupUserFromToken = () => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -55,23 +61,61 @@ export const AuthProvider = ({ children }) => {
   // Login user
   const login = async (email, password) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/login`, { email, password });
-      const { token, user } = response.data;
+      // Try to connect to backend first
+      try {
+        const response = await axios.post(`${API_BASE_URL}/auth/login`, { email, password });
+        const { token, user } = response.data;
 
-      if (!token) return { success: false, error: 'No token received from server' };
+        if (!token) return { success: false, error: 'No token received from server' };
 
-      localStorage.setItem('token', token);
-      localStorage.setItem('userId', user.id);
-      localStorage.setItem('userEmail', user.email);
-      localStorage.setItem('name', user.name);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        localStorage.setItem('token', token);
+        localStorage.setItem('userId', user.id);
+        localStorage.setItem('userEmail', user.email);
+        localStorage.setItem('name', user.name);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-      const decoded = jwtDecode(token);
-      setUser({ ...decoded, ...user });
+        const decoded = jwtDecode(token);
+        setUser({ ...decoded, ...user });
 
-      return { success: true };
+        return { success: true };
+      } catch (backendError) {
+        // If backend is not available, use demo mode
+        console.warn('Backend not available, using demo mode:', backendError.message);
+        
+        // Demo credentials
+        const demoAccounts = {
+          'admin@example.com': { password: 'admin123', name: 'Admin User', role: 'ADMIN' },
+          'teacher@example.com': { password: 'teacher123', name: 'Teacher User', role: 'TEACHER' },
+          'student@example.com': { password: 'student123', name: 'Student User', role: 'STUDENT' },
+          'demo@example.com': { password: 'password123', name: 'Demo User', role: 'STUDENT' },
+        };
+
+        const account = demoAccounts[email];
+        if (!account || account.password !== password) {
+          return { success: false, error: 'Invalid email or password' };
+        }
+
+        // Create a mock token
+        const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjk5OTk5OTk5OTl9.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U';
+        
+        localStorage.setItem('token', mockToken);
+        localStorage.setItem('userId', '1');
+        localStorage.setItem('userEmail', email);
+        localStorage.setItem('name', account.name);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${mockToken}`;
+
+        setUser({
+          id: '1',
+          email: email,
+          name: account.name,
+          role: account.role,
+          exp: 9999999999
+        });
+
+        return { success: true };
+      }
     } catch (error) {
-      return { success: false, error: error.response?.data?.message || 'Login failed' };
+      return { success: false, error: error.message || 'Login failed' };
     }
   };
 

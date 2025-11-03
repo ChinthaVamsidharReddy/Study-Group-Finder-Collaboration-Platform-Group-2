@@ -73,7 +73,7 @@ export default function ForgotPassword() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dark-bg px-4">
       <div className="max-w-md w-full bg-white dark:bg-dark-card rounded-xl shadow-lg p-6 space-y-6">
-        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-dark-text">
+        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
           {step === 1 && "Forgot Password"}
           {step === 2 && "Verify OTP"}
           {step === 3 && "Reset Password"}

@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.infy.project.ApplicationTests
 -------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.925 s -- in com.infy.project.ApplicationTests
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 9.104 s -- in com.infy.project.ApplicationTests

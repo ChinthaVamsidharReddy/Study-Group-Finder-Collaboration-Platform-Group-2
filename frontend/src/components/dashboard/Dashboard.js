@@ -3,8 +3,9 @@ import { useAuth } from '../../contexts/AuthContext';
 import CourseManager from '../courses/CourseManager';
 import StudyGroups from './StudyGroups';
 import PeerSuggestions from './PeerSuggestions';
+import ChatList from '../chat/ChatList';
 import { useCourses } from '../../contexts/CoursesContext';
-import { AcademicCapIcon, UserGroupIcon, UsersIcon, BookOpenIcon } from '@heroicons/react/24/outline';
+import { AcademicCapIcon, UserGroupIcon, UsersIcon, BookOpenIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 
 const API_BASE_URL = "http://localhost:8080/courses"; 
 
@@ -34,69 +35,86 @@ const loadDashboardStats = async () => {
     const cachedCount = parseInt(localStorage.getItem("EnrolledCourses")) || 0;
     setStats(prev => ({ ...prev, enrolledCourses: cachedCount }));
 
-    // 2️⃣ Fetch enrolled courses
-    const courseResponse = await fetch(`${API_BASE_URL}/enrolled/${userId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-    });
+    // Try to fetch from backend, but don't fail if unavailable (demo mode)
+    try {
+      // 2️⃣ Fetch enrolled courses
+      const courseResponse = await fetch(`${API_BASE_URL}/enrolled/${userId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
 
-    if (!courseResponse.ok)
-      throw new Error(`HTTP error! status: ${courseResponse.status}`);
+      if (courseResponse.ok) {
+        const courseData = await courseResponse.json();
+        const enrolledCount = Array.isArray(courseData)
+          ? courseData.length
+          : courseData.count || 0;
 
-    const courseData = await courseResponse.json();
-    const enrolledCount = Array.isArray(courseData)
-      ? courseData.length
-      : courseData.count || 0;
+        setStats(prev => ({ ...prev, enrolledCourses: enrolledCount }));
+        localStorage.setItem("EnrolledCourses", enrolledCount);
+      }
+    } catch (e) {
+      console.warn("Could not fetch courses (backend unavailable):", e.message);
+      // Use demo data
+      setStats(prev => ({ ...prev, enrolledCourses: 3 }));
+    }
 
-    setStats(prev => ({ ...prev, enrolledCourses: enrolledCount }));
-    localStorage.setItem("EnrolledCourses", enrolledCount);
+    try {
+      // 3️⃣ Fetch joined groups
+      const groupResponse = await fetch(`http://localhost:8080/api/groups/joined/${userId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
 
-    // 3️⃣ Fetch joined groups
-    const groupResponse = await fetch(`http://localhost:8080/api/groups/joined/${userId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-    });
+      if (groupResponse.ok) {
+        const groupData = await groupResponse.json();
+        const joinedGroupsCount = Array.isArray(groupData)
+          ? groupData.length
+          : groupData.count || 0;
+        setStats(prev => ({ ...prev, studyGroups: joinedGroupsCount }));
+      }
+    } catch (e) {
+      console.warn("Could not fetch groups (backend unavailable):", e.message);
+      // Use demo data
+      setStats(prev => ({ ...prev, studyGroups: 2 }));
+    }
 
-    if (!groupResponse.ok)
-      throw new Error(`HTTP error! status: ${groupResponse.status}`);
+    try {
+      // 4️⃣ Fetch suggested peers
+      const peersResponse = await fetch(`http://localhost:8080/courses/${userId}/peers`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
 
-    const groupData = await groupResponse.json();
-    const joinedGroupsCount = Array.isArray(groupData)
-      ? groupData.length
-      : groupData.count || 0;
-
-    // 4️⃣ Fetch suggested peers
-    const peersResponse = await fetch(`http://localhost:8080/courses/${userId}/peers`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-    });
-
-    if (!peersResponse.ok)
-      throw new Error(`HTTP error! status: ${peersResponse.status}`);
-
-    const peersData = await peersResponse.json();
-    const suggestedPeersCount = Array.isArray(peersData)
-      ? peersData.length
-      : peersData.count || 0;
-
-    // 5️⃣ Update dashboard stats with all counts
-    setStats(prev => ({
-      ...prev,
-      studyGroups: joinedGroupsCount,
-      suggestedPeers: suggestedPeersCount,
-    }));
+      if (peersResponse.ok) {
+        const peersData = await peersResponse.json();
+        const suggestedPeersCount = Array.isArray(peersData)
+          ? peersData.length
+          : peersData.count || 0;
+        setStats(prev => ({ ...prev, suggestedPeers: suggestedPeersCount }));
+      }
+    } catch (e) {
+      console.warn("Could not fetch peers (backend unavailable):", e.message);
+      // Use demo data
+      setStats(prev => ({ ...prev, suggestedPeers: 5 }));
+    }
 
   } catch (error) {
-    console.error("Error fetching dashboard stats:", error);
+    console.error("Error in loadDashboardStats:", error);
+    // Set default demo stats
+    setStats({
+      enrolledCourses: 3,
+      studyGroups: 2,
+      suggestedPeers: 5
+    });
   }
 };
 
@@ -107,6 +125,7 @@ const loadDashboardStats = async () => {
     { id: 'courses', name: 'My Courses', icon: BookOpenIcon },
     { id: 'groups', name: 'Study Groups', icon: UserGroupIcon },
     { id: 'peers', name: 'Find Peers', icon: UsersIcon },
+    { id: 'chats', name: 'Chats', icon: ChatBubbleLeftIcon },
   ];
 
   const StatCard = ({ title, value, icon: Icon, color = 'primary' }) => (
@@ -115,8 +134,8 @@ const loadDashboardStats = async () => {
         <Icon className={`h-6 w-6 text-${color}-600`} />
       </div>
       <div>
-        <p className="text-sm font-medium text-gray-500">{title}</p>
-        <p className="text-xl font-semibold text-gray-900">{value}</p>
+        <p className="text-sm font-medium text-gray-500 dark:text-dark-textSecondary">{title}</p>
+        <p className="text-xl font-semibold text-gray-900 dark:text-white">{value}</p>
       </div>
     </div>
   );
@@ -124,11 +143,13 @@ const loadDashboardStats = async () => {
   const OverviewTab = () => (
     <div className="space-y-6">
       {/* Welcome Section */}
-      <div className="card p-4 bg-white shadow-sm rounded-lg">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-          Welcome back, {localStorage.getItem("name")?.split(" ")[0]}! 👋
-        </h2>
-        <p className="text-gray-600">Ready to connect with your study partners and ace your courses?</p>
+      <div className="card p-4 bg-white dark:bg-dark-card shadow-sm rounded-lg border border-gray-200 dark:border-dark-border">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            Welcome back, {localStorage.getItem("name")?.split(" ")[0]}! 👋
+          </h1>
+          <p className="text-gray-600 dark:text-dark-textSecondary">Ready to connect with your study partners and ace your courses?</p>
+        </div>
       </div>
 
       {/* Stats Grid */}
@@ -139,58 +160,58 @@ const loadDashboardStats = async () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="card p-4 bg-white shadow-sm rounded-lg">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+      <div className="card p-4 bg-white dark:bg-dark-card shadow-sm rounded-lg border border-gray-200 dark:border-dark-border">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Quick Actions</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <button onClick={() => setActiveTab('courses')} className="p-4 border rounded-lg hover:bg-gray-50 text-left transition">
-            <BookOpenIcon className="h-6 w-6 text-blue-600 mb-2" />
-            <h4 className="font-medium text-gray-900">Manage Courses</h4>
-            <p className="text-sm text-gray-500">Add or remove courses</p>
+          <button onClick={() => setActiveTab('courses')} className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-dark-hover text-left transition">
+            <BookOpenIcon className="h-6 w-6 text-blue-600 dark:text-blue-300 mb-2" />
+            <h4 className="font-medium text-gray-900 dark:text-white">Manage Courses</h4>
+            <p className="text-sm text-gray-500 dark:text-dark-textSecondary">Add or remove courses</p>
           </button>
-          <button onClick={() => setActiveTab('groups')} className="p-4 border rounded-lg hover:bg-gray-50 text-left transition">
-            <UserGroupIcon className="h-6 w-6 text-green-600 mb-2" />
-            <h4 className="font-medium text-gray-900">Study Groups</h4>
-            <p className="text-sm text-gray-500">Join or create groups</p>
+          <button onClick={() => setActiveTab('groups')} className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-dark-hover text-left transition">
+            <UserGroupIcon className="h-6 w-6 text-green-600 dark:text-green-300 mb-2" />
+            <h4 className="font-medium text-gray-900 dark:text-white">Study Groups</h4>
+            <p className="text-sm text-gray-500 dark:text-dark-textSecondary">Join or create groups</p>
           </button>
-          <button onClick={() => setActiveTab('peers')} className="p-4 border rounded-lg hover:bg-gray-50 text-left transition">
-            <UsersIcon className="h-6 w-6 text-purple-600 mb-2" />
-            <h4 className="font-medium text-gray-900">Find Peers</h4>
-            <p className="text-sm text-gray-500">Connect with classmates</p>
+          <button onClick={() => setActiveTab('peers')} className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-dark-hover text-left transition">
+            <UsersIcon className="h-6 w-6 text-purple-600 dark:text-purple-300 mb-2" />
+            <h4 className="font-medium text-gray-900 dark:text-white">Find Peers</h4>
+            <p className="text-sm text-gray-500 dark:text-dark-textSecondary">Connect with classmates</p>
           </button>
-          <button onClick={() => window.location.href = '/profile'} className="p-4 border rounded-lg hover:bg-gray-50 text-left transition">
-            <AcademicCapIcon className="h-6 w-6 text-orange-600 mb-2" />
-            <h4 className="font-medium text-gray-900">Update Profile</h4>
-            <p className="text-sm text-gray-500">Edit your information</p>
+          <button onClick={() => window.location.href = '/profile'} className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-dark-hover text-left transition">
+            <AcademicCapIcon className="h-6 w-6 text-orange-600 dark:text-orange-300 mb-2" />
+            <h4 className="font-medium text-gray-900 dark:text-white">Update Profile</h4>
+            <p className="text-sm text-gray-500 dark:text-dark-textSecondary">Edit your information</p>
           </button>
         </div>
       </div>
 
       {/* Recent Activity */}
-      <div className="card p-4 bg-white shadow-sm rounded-lg">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
+      <div className="card p-4 bg-white dark:bg-dark-card shadow-sm rounded-lg border border-gray-200 dark:border-dark-border">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Recent Activity</h3>
         <div className="space-y-2">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-gray-50 dark:bg-dark-hover rounded-lg">
             <div className="flex items-center space-x-2 mb-1 sm:mb-0">
               <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-              <p className="text-sm text-gray-600">You joined the <span className="font-medium">CS101 Study Group</span></p>
+              <p className="text-sm text-gray-600 dark:text-dark-textSecondary">You joined the <span className="font-medium">CS101 Study Group</span></p>
             </div>
-            <span className="text-xs text-gray-400">2 hours ago</span>
+            <span className="text-xs text-gray-400 dark:text-dark-textSecondary">2 hours ago</span>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-gray-50 dark:bg-dark-hover rounded-lg">
             <div className="flex items-center space-x-2 mb-1 sm:mb-0">
               <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-              <p className="text-sm text-gray-600">You enrolled in <span className="font-medium">MATH201 - Calculus II</span></p>
+              <p className="text-sm text-gray-600 dark:text-dark-textSecondary">You enrolled in <span className="font-medium">MATH201 - Calculus II</span></p>
             </div>
-            <span className="text-xs text-gray-400">1 day ago</span>
+            <span className="text-xs text-gray-400 dark:text-dark-textSecondary">1 day ago</span>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-gray-50 dark:bg-dark-hover rounded-lg">
             <div className="flex items-center space-x-2 mb-1 sm:mb-0">
               <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-              <p className="text-sm text-gray-600"><span className="font-medium">Sarah Johnson</span> wants to connect with you</p>
+              <p className="text-sm text-gray-600 dark:text-dark-textSecondary"><span className="font-medium">Sarah Johnson</span> wants to connect with you</p>
             </div>
-            <span className="text-xs text-gray-400">2 days ago</span>
+            <span className="text-xs text-gray-400 dark:text-dark-textSecondary">2 days ago</span>
           </div>
         </div>
       </div>
@@ -220,14 +241,19 @@ const loadDashboardStats = async () => {
         </nav>
       </div>
 
-      {/* Tab Content */}
-      <div>
-        {activeTab === 'overview' && <OverviewTab />}
-        {activeTab === 'courses' && <CourseManager />}
-        {activeTab === 'groups' && <StudyGroups />}
-        {activeTab === 'peers' && <PeerSuggestions />}
+
+        {/* Tab Content */}
+        <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm border border-gray-200 dark:border-dark-border">
+          <div className="p-6">
+            {activeTab === 'overview' && <OverviewTab />}
+            {activeTab === 'courses' && <CourseManager />}
+            {activeTab === 'groups' && <StudyGroups />}
+            {activeTab === 'peers' && <PeerSuggestions />}
+            {activeTab === 'chats' && <ChatList />}
+          </div>
+        </div>
       </div>
-    </div>
+    // </div>
   );
 };
 

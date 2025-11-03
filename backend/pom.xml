@@ -100,13 +100,33 @@
     <artifactId>spring-security-crypto</artifactId>
 </dependency>
 
-<!-- Lombok for reducing boilerplate code -->
+
+<!-- ✅ Core for REST APIs -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+
+<!-- ✅ WebSocket + STOMP support -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-websocket</artifactId>
+</dependency>
+
+<!-- ✅ JSON serialization -->
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+</dependency>
+
+<!-- ✅ Optional, helps reduce boilerplate -->
 <dependency>
     <groupId>org.projectlombok</groupId>
     <artifactId>lombok</artifactId>
-    <version>1.18.34</version>
-    <scope>provided</scope>
+    <optional>true</optional>
 </dependency>
+
+
 
         <!-- Testing -->
         <dependency>

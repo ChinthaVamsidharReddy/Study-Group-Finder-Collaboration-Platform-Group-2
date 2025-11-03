@@ -221,7 +221,7 @@ const handlePasswordUpdate = async (e) => {
       <div className="bg-white dark:bg-dark-surface shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-dark-text">Profile Settings</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Profile Settings</h3>
             <button
               onClick={handleEditToggle}
               className="flex items-center space-x-1 text-primary-600 hover:text-primary-500"
@@ -282,7 +282,7 @@ const handlePasswordUpdate = async (e) => {
 
             {/* Secondary School */}
             <div className="space-y-4 p-4 bg-gray-50 dark:bg-dark-hover rounded-lg">
-              <h3 className="text-md font-medium text-gray-900 dark:text-dark-text">Secondary School</h3>
+              <h3 className="text-md font-medium text-gray-900 dark:text-white">Secondary School</h3>
               <InputField label="School Name" name="secondarySchool" value={formData.secondarySchool} editMode={editMode} onChange={handleChange} />
               <InputField label="Passing Year" name="secondarySchoolPassingYear" type="number" value={formData.secondarySchoolPassingYear} editMode={editMode} onChange={handleChange} />
               <InputField label="Percentage" name="secondarySchoolPercentage" type="number" value={formData.secondarySchoolPercentage} editMode={editMode} onChange={handleChange} />
@@ -290,7 +290,7 @@ const handlePasswordUpdate = async (e) => {
 
             {/* Higher Secondary School */}
             <div className="space-y-4 p-4 bg-gray-50 dark:bg-dark-hover rounded-lg">
-              <h3 className="text-md font-medium text-gray-900 dark:text-dark-text">Higher Secondary School</h3>
+              <h3 className="text-md font-medium text-gray-900 dark:text-white">Higher Secondary School</h3>
               <InputField label="School Name" name="higherSecondarySchool" value={formData.higherSecondarySchool} editMode={editMode} onChange={handleChange} />
               <InputField label="Passing Year" name="higherSecondaryPassingYear" type="number" value={formData.higherSecondaryPassingYear} editMode={editMode} onChange={handleChange} />
               <InputField label="Percentage" name="higherSecondaryPercentage" type="number" value={formData.higherSecondaryPercentage} editMode={editMode} onChange={handleChange} />
@@ -298,7 +298,7 @@ const handlePasswordUpdate = async (e) => {
 
             {/* University */}
             <div className="space-y-4 p-4 bg-gray-50 dark:bg-dark-hover rounded-lg">
-              <h3 className="text-md font-medium text-gray-900 dark:text-dark-text">University</h3>
+              <h3 className="text-md font-medium text-gray-900 dark:text-white">University</h3>
               <InputField label="University Name" name="universityName" value={formData.universityName} editMode={editMode} onChange={handleChange} />
               <InputField label="Passing Year" name="universityPassingYear" type="number" value={formData.universityPassingYear} editMode={editMode} onChange={handleChange} />
               <InputField label="GPA" name="universityPassingGPA" type="number" value={formData.universityPassingGPA} editMode={editMode} onChange={handleChange} />
@@ -333,7 +333,7 @@ const handlePasswordUpdate = async (e) => {
           </form>
 
           <div className="mt-10 border-t pt-8">
-  <h3 className="text-xl font-semibold text-gray-900 dark:text-dark-text mb-6">
+  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
     Change Password
   </h3>
 
@@ -363,7 +363,7 @@ const handlePasswordUpdate = async (e) => {
         value={oldPassword}
         onChange={(e) => setOldPassword(e.target.value)}
         required
-        className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-md focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600 focus:outline-none bg-white dark:bg-dark-input text-gray-900 dark:text-dark-text"
+        className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-md focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600 focus:outline-none bg-white dark:bg-dark-input text-gray-900 dark:text-white"
       />
     </div>
 
@@ -377,7 +377,7 @@ const handlePasswordUpdate = async (e) => {
         value={newPassword}
         onChange={(e) => setNewPassword(e.target.value)}
         required
-        className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-md focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600 focus:outline-none bg-white dark:bg-dark-input text-gray-900 dark:text-dark-text"
+        className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-md focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600 focus:outline-none bg-white dark:bg-dark-input text-gray-900 dark:text-white"
       />
     </div>
 
@@ -391,7 +391,7 @@ const handlePasswordUpdate = async (e) => {
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
         required
-        className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-md focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600 focus:outline-none bg-white dark:bg-dark-input text-gray-900 dark:text-dark-text"
+        className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-md focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600 focus:outline-none bg-white dark:bg-dark-input text-gray-900 dark:text-white"
       />
     </div>
 
