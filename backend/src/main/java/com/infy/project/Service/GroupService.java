@@ -9,9 +9,12 @@ import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.infy.project.Dto.AdminDto;
+import com.infy.project.Dto.GroupDetailDto;
 import com.infy.project.Dto.GroupJoinRequestDTO;
 import com.infy.project.Dto.GroupRequestDTO;
 import com.infy.project.Dto.GroupResponseDTO;
+import com.infy.project.Dto.MemberDto;
 import com.infy.project.Interface.GroupMemberRepository;
 import com.infy.project.Interface.GroupRepository;
 import com.infy.project.Interface.RegisterRepository;
@@ -115,7 +118,7 @@ public class GroupService {
 
     /** 🔹 Reject join request */
     @Transactional
-    public void rejectRequest(Long memberId, Long adminId) {
+    public String rejectRequest(Long memberId, Long adminId) {
         GroupMember member = groupMemberRepository.findById(memberId)
                 .orElseThrow(() -> new RuntimeException("Member not found in this group"));
 
@@ -124,7 +127,9 @@ public class GroupService {
         }
 
         groupMemberRepository.delete(member);
+        return "Member rejected successfully.";
     }
+
 
     /** 🔹 Leave a group */
     @Transactional
@@ -139,7 +144,7 @@ public class GroupService {
     public void deleteGroup(Long groupId, Long adminId) {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new RuntimeException("Group not found"));
-
+        System.out.println("\n\n\n\n\n\n\n\n\n\n*******"+adminId+"\n\n\n\n\n\n\n\n\n\n*******");
         GroupMember adminMember = groupMemberRepository.findByGroupIdAndUserId(groupId, adminId)
                 .orElseThrow(() -> new RuntimeException("Admin not part of this group"));
 
@@ -196,5 +201,38 @@ public class GroupService {
                 member.getJoinedAt() != null ? member.getJoinedAt().toString() : null
             );
         }).collect(Collectors.toList());
+    }
+    
+    public GroupDetailDto getGroupDetailsById(Long groupId) {
+
+        // 1️ Get group basic info
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
+
+        // 2️ Get admin (createdBy user) details
+        Register adminUser = registerRepository.findById(group.getCreatedBy())
+                .orElseThrow(() -> new RuntimeException("Admin user not found"));
+
+        AdminDto admin = new AdminDto(adminUser.getId(), adminUser.getName(), adminUser.getMajor());
+
+        // 3️ Get all members of the group
+        List<GroupMember> members = groupMemberRepository.findByGroupId(groupId);
+
+        List<MemberDto> memberDTOs = members.stream()
+                .map((GroupMember m) -> {
+                    Register user = m.getUser();
+                    return new MemberDto(user.getId(), user.getName(), user.getMajor(), m.getRole().name());
+                })
+                .collect(Collectors.toList());
+
+        // 4️ Create GroupDetailDTO to return
+        return new GroupDetailDto(
+                group.getId(),
+                group.getName(),
+                group.getDescription(),
+                group.getCourseId(),
+                admin,
+                memberDTOs
+        );
     }
 }

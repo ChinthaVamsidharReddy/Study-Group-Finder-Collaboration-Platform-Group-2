@@ -11,6 +11,7 @@ import java.util.Optional;
 @Repository
 public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> {
 
+	
     List<GroupMember> findByUserId(Long userId);
     List<GroupMember> findByGroupId(Long groupId);
     Optional<GroupMember> findByGroupIdAndUserId(Long groupId, Long userId);
@@ -18,6 +19,9 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> 
 
     @Query("SELECT COUNT(gm) FROM GroupMember gm WHERE gm.group.id = :groupId AND gm.approved = true")
     int countApprovedMembersByGroupId(@Param("groupId") Long groupId);
+
+    @Query("SELECT gm.user.id FROM GroupMember gm WHERE gm.group.id = :groupId AND gm.approved = true")
+    List<Long> findApprovedUserIdsByGroupId(@Param("groupId") Long groupId);
 
 
 }

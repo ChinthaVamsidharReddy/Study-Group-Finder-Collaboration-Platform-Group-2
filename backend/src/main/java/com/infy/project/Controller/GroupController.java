@@ -1,6 +1,7 @@
 package com.infy.project.Controller;
 
 import com.infy.project.Service.GroupService;
+import com.infy.project.Dto.GroupDetailDto;
 import com.infy.project.Dto.GroupJoinRequestDTO;
 import com.infy.project.Dto.GroupRequestDTO;
 import com.infy.project.Dto.GroupResponseDTO;
@@ -21,6 +22,7 @@ public class GroupController {
     // 1️ Create Group
     @PostMapping
     public ResponseEntity<GroupResponseDTO> createGroup(@RequestBody GroupRequestDTO groupRequest) {
+//    	System.out.println("\n\n\n\n\n"+groupRequest.getCourseId()+"\n\n\n\n"+groupRequest.getCode());
         Long creatorId = groupRequest.getUserId();
         return ResponseEntity.ok(groupService.createGroup(groupRequest, creatorId));
     }
@@ -95,7 +97,14 @@ public class GroupController {
     public ResponseEntity<String> rejectionMember(
             @PathVariable Long memberId,
             @RequestParam Long adminId) {
-        return ResponseEntity.ok(groupService.approveJoinRequest(memberId, adminId));
+        return ResponseEntity.ok(groupService.rejectRequest(memberId, adminId));
+    }
+
+    
+    @GetMapping("/{groupId}")
+    public ResponseEntity<GroupDetailDto> getGroupDetails(@PathVariable Long groupId) {
+        GroupDetailDto groupDetail = groupService.getGroupDetailsById(groupId);
+        return ResponseEntity.ok(groupDetail);
     }
 
 }

@@ -23,7 +23,9 @@ public class Security {
             .and()
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
+            		.requestMatchers("/ws/**").permitAll() 
                 .requestMatchers("/auth/**").permitAll()
+//                .requestMatchers("/api/chat/messages/**").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
